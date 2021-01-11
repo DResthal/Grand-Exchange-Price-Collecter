@@ -1,6 +1,8 @@
 import requests as req
 import math
 import json
+import csv
+import os
 from datetime import datetime
 
 # import json
@@ -10,9 +12,8 @@ categories_url = "https://secure.runescape.com/m=itemdb_rs/api/catalogue/categor
 
 # Pass each category's groups of items to another function
 def get_groups(cat_response, cat_num):
-    print(f'Category: {cat_num}')
 
-    # Encode '#' for later use in URL
+    # Encode '#' for later use in the URL
     if cat_response[0]["letter"] == '#':
         cat_response[0]["letter"] = '%23'
 
@@ -20,10 +21,10 @@ def get_groups(cat_response, cat_num):
         letter = cat_response[i]['letter']
         num_items = cat_response[i]["items"]
 
-        # Find the number of pages there are based on the number of items (of which there are 12 per page)
+        # Find the number of pages there are based on the number of items (of which there are 12 per page), round up to nearest whole
         num_pages = math.ceil((num_items / 12) + 1)
 
-        # Do not send to get_items if no items exist
+        # Do not send to get_items if no pages of items exist
         if num_pages != 0:
             get_items_list(letter, num_pages, cat_num)
         else:
@@ -32,30 +33,45 @@ def get_groups(cat_response, cat_num):
 
 
 def get_items_list(letter, num_pages, cat_num):
-    print(f"Number of Pages in {letter}: {num_pages}")
 
     for page in range(num_pages):
-        # print(f"For each page in number of pages: page = {page}")
         url = f'https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category={cat_num}&alpha={letter}&page={page}'
         raw_items = req.get(url).json()
+
+        # logging all things before processing
+        # I want to avoid writing this, when necessary, but because it is a loop, it is proving somewhat challenging
+        # checking if the file exists would stop all other categories from writing to the page, but not checking
+        # wastes time by writing to this csv every single run...
+        # I'm honestly not sure if I will keep this level of logging in the future, why do I need it?
+        with open('all_items.csv', 'a') as f:
+            writer = csv.writer(f, delimiter=',')
+            writer.writerow(raw_items)
+
         get_single_items(raw_items)
 
 
 def get_single_items(raw_items):
     converted_to_dict = json.dumps(raw_items)
-    converted_to_json = json.loads(converted_to_dict)
-    
-    items = converted_to_json['items']
+    items = json.loads(converted_to_dict)['items']
+    today = datetime.now().strftime("%m-%d-%Y-%H")
+    csv_columns = ['id', 'name', 'description', 'type', 'current_price', 'members']
 
     for item in items:
-        name = item['name']
-        price = item['current']['price']
 
-        print(name + ' : ' + str(price))    
+        item_dict = {
+        'id' : item['id'],
+        'name' : item['name'],
+        'description' : item['description'],
+        'type' : item['type'],
+        'current_price' : item['current']['price'],
+        'members' : item['members']
+        }
 
-
-    
-    
+        # logging individual items
+        with open(f'{today}_single_items.csv', 'a') as f:
+            file_writer = csv.DictWriter(f, delimiter=',', fieldnames=csv_columns)
+            file_writer.writeheader()
+            file_writer.writerow(item_dict)
 
 # Iterate over each category, I have manually descovered that there are 42 categories, 43+ returns null
 # Example response
