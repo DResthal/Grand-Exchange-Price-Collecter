@@ -1,5 +1,6 @@
 import requests as req
 import math
+import json
 from datetime import datetime
 
 # import json
@@ -20,23 +21,38 @@ def get_groups(cat_response, cat_num):
         num_items = cat_response[i]["items"]
 
         # Find the number of pages there are based on the number of items (of which there are 12 per page)
-        num_pages = math.ceil(num_items / 12)
+        num_pages = math.ceil((num_items / 12) + 1)
 
         # Do not send to get_items if no items exist
         if num_pages != 0:
-            get_items(letter, num_pages, cat_num)
+            get_items_list(letter, num_pages, cat_num)
         else:
             pass
 
 
 
-def get_items(letter, num_pages, cat_num):
+def get_items_list(letter, num_pages, cat_num):
     print(f"Number of Pages in {letter}: {num_pages}")
 
     for page in range(num_pages):
+        # print(f"For each page in number of pages: page = {page}")
         url = f'https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category={cat_num}&alpha={letter}&page={page}'
-        raw_items = req.get(url)
-        print(raw_items.json())
+        raw_items = req.get(url).json()
+        get_single_items(raw_items)
+
+
+def get_single_items(raw_items):
+    converted_to_dict = json.dumps(raw_items)
+    converted_to_json = json.loads(converted_to_dict)
+    
+    items = converted_to_json['items']
+
+    for item in items:
+        name = item['name']
+        price = item['current']['price']
+
+        print(name + ' : ' + str(price))    
+
 
     
     
