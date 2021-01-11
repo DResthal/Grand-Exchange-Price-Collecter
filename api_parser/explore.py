@@ -105,7 +105,9 @@ def get_single_items(raw_items):
 #    {'letter': 'z', 'items': 9}
 # ]
 
-for i in range(2):
+for i in range(43):
     print(f"cat: {i}")
     category_response = req.get(categories_url + str(i)).json()["alpha"]
     get_groups(category_response, i)
+
+print(f"Completed at: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}"
