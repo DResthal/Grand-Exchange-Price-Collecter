@@ -4,21 +4,42 @@ from datetime import datetime
 
 # import json
 
-categories_url = (
-    "https://secure.runescape.com/m=itemdb_rs/api/catalogue/category.json?category=0"
-)
+categories_url = "https://secure.runescape.com/m=itemdb_rs/api/catalogue/category.json?category=0"
 # items url = "https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category=0&alpha=a&page=1"
 
+# Pass each category's groups of items to another function
+def get_groups(cat_response, cat_num):
+    print(f'Category: {cat_num}')
 
-def get_groups(cat):
-    item_list = []
+    # Encode '#' for later use in URL
+    if cat_response[0]["letter"] == '#':
+        cat_response[0]["letter"] = '%23'
 
-    for i in range(len(cat)):
-        item_group = {cat[i]["letter"], cat[i]["items"]}
-        item_list.append(item_group)
+    for i in range(len(cat_response)):
+        letter = cat_response[i]['letter']
+        num_items = cat_response[i]["items"]
 
-    print(item_list)
+        # Find the number of pages there are based on the number of items (of which there are 12 per page)
+        num_pages = math.ceil(num_items / 12)
 
+        # Do not send to get_items if no items exist
+        if num_pages != 0:
+            get_items(letter, num_pages, cat_num)
+        else:
+            pass
+
+
+
+def get_items(letter, num_pages, cat_num):
+    print(f"Number of Pages in {letter}: {num_pages}")
+
+    for page in range(num_pages):
+        url = f'https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category={cat_num}&alpha={letter}&page={page}'
+        raw_items = req.get(url)
+        print(raw_items.json())
+
+    
+    
 
 # Iterate over each category, I have manually descovered that there are 42 categories, 43+ returns null
 # Example response
@@ -51,6 +72,8 @@ def get_groups(cat):
 #    {'letter': 'y', 'items': 2},
 #    {'letter': 'z', 'items': 9}
 # ]
-for i in range(1):
+
+for i in range(2):
+    print(f"cat: {i}")
     category_response = req.get(categories_url + str(i)).json()["alpha"]
-    get_groups(category_response)
+    get_groups(category_response, i)
