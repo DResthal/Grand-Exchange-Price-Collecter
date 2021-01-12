@@ -4,6 +4,7 @@ import json
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import time
 
 
 today = datetime.now().strftime("%m-%d-%Y-%H")
@@ -40,7 +41,9 @@ def get_items_list(letter, num_pages, cat_num):
     for page in range(num_pages):
         url = f"https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category={cat_num}&alpha={letter}&page={page}"
         print(f"Fetching items from item url. Page: {page}, Letter: {letter}")
+        start = time.perf_counter()
         raw_items = req.get(url).json()
+        print(f'URL Fetch took {round((time.perf_counter() - start), 3)} seconds...')
         print(url)
         get_single_items(raw_items)
 
