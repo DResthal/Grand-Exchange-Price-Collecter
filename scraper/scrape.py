@@ -11,7 +11,8 @@ today = datetime.now().strftime("%m-%d-%Y-%H")
 now = datetime.now().strftime("%m-%d-%Y-%H-%M")
 
 categories_url = (
-    "https://secure.runescape.com/m=itemdb_rs/api/catalogue/category.json?category=0"
+    "https://secure.runescape.com/m=itemdb_rs/api/catalogue/category.json?category=
+    "
 )
 # items url = "https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category=0&alpha=a&page=1"
 
@@ -35,13 +36,14 @@ def get_groups(cat_response, cat_num):
             pass
 
 
-# Get the list of items from the item group
+# Get the list of items from the each item group page
 def get_items_list(letter, num_pages, cat_num):
 
     for page in range(num_pages):
         url = f"https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category={cat_num}&alpha={letter}&page={page}"
         print(f"Fetching items from item url. Page: {page}, Letter: {letter}")
         start = time.perf_counter()
+        # Currently, this breaks the entire program if TimeOut or other failure...
         raw_items = req.get(url).json()
         print(f'URL Fetch took {round((time.perf_counter() - start), 3)} seconds...')
         print(url)
