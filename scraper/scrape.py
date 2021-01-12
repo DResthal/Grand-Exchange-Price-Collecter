@@ -58,6 +58,20 @@ def get_groups(cat_response, cat_num):
         else:
             pass
 
+def fetch_items(url: str):
+    s = req.Session()
+    try:
+        raw_items = requests_retry_session(session=s).get(url).json()
+        get_single_items(raw_items)
+    except req.exceptions.RequestException as e:
+        now = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
+        with open(f"error_{now}.log", "w") as f:
+            f.write(e)
+            f.write(
+                "####################### Response Content #######################"
+            )
+            f.write(raw_items)
+            pass
 
 # Get the list of items from the each item group page
 def get_items_list(letter, num_pages, cat_num):
@@ -66,24 +80,8 @@ def get_items_list(letter, num_pages, cat_num):
         url = f"https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category={cat_num}&alpha={letter}&page={page}"
         print(f"Fetching items from item url. Page: {page}, Letter: {letter}")
         start = time.perf_counter()
-
-        # So far, this has taken care of TimeOut errors
         print(url)
-        s = req.Session()
-
-        try:
-            raw_items = requests_retry_session(session=s).get(url).json()
-            get_single_items(raw_items)
-        except req.exceptions.RequestException as e:
-            now = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
-            with open(f"error_{now}.log", "w") as f:
-                f.write(e)
-                f.write(
-                    "####################### Response Content #######################"
-                )
-                f.write(raw_items)
-                continue
-
+        fetch_items(url)
         print(f"URL Fetch took {round((time.perf_counter() - start), 3)} seconds...")
 
 
