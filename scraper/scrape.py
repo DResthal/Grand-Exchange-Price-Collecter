@@ -78,7 +78,7 @@ def add_to_df(items):
 
 # Iterate over each category, I have manually discovered that there are 42 categories, 43+ returns null
 # For each category, get the "item groups"
-for i in range(6, 8):
+for i in range(43):
     print(f"Getting Category {i}")
     category_response = req.get(categories_url + str(i)).json()["alpha"]
     get_groups(category_response, i)
