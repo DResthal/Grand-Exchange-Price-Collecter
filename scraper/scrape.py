@@ -52,7 +52,7 @@ def get_single_items(raw_items):
     add_to_df(items)
 
 
-# Add each item to the pandas dataframe
+# Add each item to the pandas dataframe, remove duplicates, save to csv
 def add_to_df(items):
     csv_name = f"{today}_all_items.csv"
     items_list = []
@@ -72,8 +72,13 @@ def add_to_df(items):
     temp_df = pd.DataFrame(items_list).drop_duplicates(
         subset=["name", "current_price"], keep="last"
     )
-    temp_df.to_csv(csv_name, mode="a", header=False)
-    print(f"{csv_name} has been saved.")
+
+    if temp_df.empty:
+        print("You have no data here!")
+    else:
+        temp_df = temp_df.set_index(["id"])
+        temp_df.to_csv(csv_name, mode="a", header=False)
+        print(f"{csv_name} has been saved.")
 
 
 # Iterate over each category, I have manually discovered that there are 42 categories, 43+ returns null
