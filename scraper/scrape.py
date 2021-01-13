@@ -66,16 +66,15 @@ def get_groups(cat_response, cat_num):
 
 def fetch_items(url: str):
     s = req.Session()
+    response = requests_retry_session(session=s).get(url)
     try:
-        raw_items = requests_retry_session(session=s).get(url).json()
-        get_single_items(raw_items)
-    except req.exceptions.RequestException as e:
+        raw_items = response.json()
+        return(raw_items)
+    except JSONDecodeError as e:
         now = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
         logging.debug(e)
-        logging.warning(
-            "####################### Response Content #######################"
-        )
-        logging.warning(f"{raw_items}")
+        logging.debug("### Content ###")
+        logging.debug(response)
         pass
 
 
@@ -87,7 +86,7 @@ def get_items_list(letter, num_pages, cat_num):
         logging.info(f"Fetching items from item url. Page: {page}, Letter: {letter}")
         start = time.perf_counter()
         logging.info(str(url))
-        fetch_items(url)
+        get_single_items(fetch_items(url))
         logging.info(
             f"URL Fetch took {round((time.perf_counter() - start), 3)} seconds..."
         )
