@@ -7,9 +7,14 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import time
-
+import logging
 
 today = datetime.now().strftime("%m-%d-%Y-%H")
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename=f'debug_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.log',
+    format="%(asctime)s-12s %(levelname)s-12s %(message)s",
+)
 
 
 categories_url = (
@@ -58,6 +63,7 @@ def get_groups(cat_response, cat_num):
         else:
             pass
 
+
 def fetch_items(url: str):
     s = req.Session()
     try:
@@ -65,24 +71,26 @@ def fetch_items(url: str):
         get_single_items(raw_items)
     except req.exceptions.RequestException as e:
         now = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
-        with open(f"error_{now}.log", "w") as f:
-            f.write(e)
-            f.write(
-                "####################### Response Content #######################"
-            )
-            f.write(raw_items)
-            pass
+        logging.debug(e)
+        logging.warning(
+            "####################### Response Content #######################"
+        )
+        logging.warning(f"{raw_items}")
+        pass
+
 
 # Get the list of items from the each item group page
 def get_items_list(letter, num_pages, cat_num):
-    print(f"Letter: {letter} Pages: {num_pages}")
+    logging.info(f"Letter: {letter} Pages: {num_pages}")
     for page in range(num_pages):
         url = f"https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category={cat_num}&alpha={letter}&page={page}"
-        print(f"Fetching items from item url. Page: {page}, Letter: {letter}")
+        logging.info(f"Fetching items from item url. Page: {page}, Letter: {letter}")
         start = time.perf_counter()
-        print(url)
+        logging.info(str(url))
         fetch_items(url)
-        print(f"URL Fetch took {round((time.perf_counter() - start), 3)} seconds...")
+        logging.info(
+            f"URL Fetch took {round((time.perf_counter() - start), 3)} seconds..."
+        )
 
 
 # Get each item from the item list
@@ -98,16 +106,21 @@ def add_to_df(items):
     items_list = []
 
     for item in items:
-        item_dict = {
-            "id": item["id"],
-            "name": item["name"],
-            "description": item["description"],
-            "type": item["type"],
-            "current_price": item["current"]["price"],
-            "members": item["members"],
-        }
-        print(f'Adding {item["name"]} to list...')
-        items_list.append(item_dict)
+        try:
+            item_dict = {
+                "id": item["id"],
+                "name": item["name"],
+                "description": item["description"],
+                "type": item["type"],
+                "current_price": item["current"]["price"],
+                "members": item["members"],
+            }
+            print(f'Adding {item["name"]} to list...')
+            items_list.append(item_dict)
+        except JSONDecodeError as e:
+            logging.warning(e)
+            logging.warning(f"{item}")
+            pass
 
     temp_df = pd.DataFrame(items_list).drop_duplicates(
         subset=["name", "current_price"], keep="last"
