@@ -55,12 +55,13 @@ def get_groups(cat_response, cat_num):
     for i in range(len(cat_response)):
         letter = cat_response[i]["letter"]
         num_items = cat_response[i]["items"]
+        print(cat_response)
         # Find the number of pages there are based on the number of items (of which there are 12 per page), round up to nearest whole
         num_pages = math.ceil((num_items / 12))
         # Do not send to get_items if no pages of items exist
         if num_pages != 0:
             print(f"Letter: {letter} Items: {num_items} Pages: {num_pages}")
-            get_items_list(letter, num_pages, cat_num)
+            get_list_of_items(letter, num_pages, cat_num)
         else:
             pass
 
@@ -89,10 +90,11 @@ def fetch_items(url: str):
 
 
 # Get the list of items from the each item group page
-def get_items_list(letter, num_pages, cat_num):
+def get_list_of_items(letter, num_pages, cat_num):
     for page in range(num_pages):
+        page += 1
         url = f"https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category={cat_num}&alpha={letter}&page={page}"
-        start = time.perf_counter()
+        print(f"Page: {page} of {num_pages} in {letter}")
         get_single_items(fetch_items(url))
 
 
@@ -142,7 +144,7 @@ def add_to_df(items):
     else:
         temp_df = temp_df.set_index(["id"])
         temp_df.to_csv(csv_name, mode="a", header=False)
-        print(f"{csv_name} has been saved.")
+        print(f"Data saved to csv.")
 
 
 # Iterate over each category, I have manually discovered that there are 42 categories, 43+ returns null
