@@ -70,8 +70,7 @@ def fetch_items(url: str):
     try:
         raw_items = response.json()
         return(raw_items)
-    except JSONDecodeError as e:
-        now = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
+    except ValueError as e:
         logging.debug(e)
         logging.debug("### Content ###")
         logging.debug(response)
@@ -95,8 +94,13 @@ def get_items_list(letter, num_pages, cat_num):
 # Get each item from the item list
 def get_single_items(raw_items):
     converted_to_dict = json.dumps(raw_items)
-    items = json.loads(converted_to_dict)["items"]
-    add_to_df(items)
+    try:
+        items = json.loads(converted_to_dict)["items"]
+        add_to_df(items)
+    except TypeError as e:
+        logging.debug(e)
+        logging.warning("##################################")
+        pass
 
 
 # Add each item to the pandas dataframe, remove duplicates, save to csv
@@ -137,7 +141,12 @@ def add_to_df(items):
 # For each category, get the "item groups"
 for i in range(42):
     print(f"Getting Category {i}")
-    category_response = req.get(categories_url + str(i)).json()["alpha"]
-    get_groups(category_response, i)
+    
+    try:
+        category_response = req.get(categories_url + str(i)).json()["alpha"]
+        get_groups(category_response, i)
+    except json.decoder.JSONDecodeError as e:
+        logging.debug(e)
+        logging.warning(category_response)
 
 print(f"Completed at: {datetime.now().strftime('%m/%d/%Y %H:%M:%S')}")
