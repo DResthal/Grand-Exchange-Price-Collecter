@@ -55,7 +55,6 @@ def get_groups(cat_response, cat_num):
     for i in range(len(cat_response)):
         letter = cat_response[i]["letter"]
         num_items = cat_response[i]["items"]
-        print(cat_response)
         # Find the number of pages there are based on the number of items (of which there are 12 per page), round up to nearest whole
         num_pages = math.ceil((num_items / 12))
         # Do not send to get_items if no pages of items exist
