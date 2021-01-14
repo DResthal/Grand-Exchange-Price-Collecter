@@ -8,12 +8,13 @@ import numpy as np
 from datetime import datetime
 import time
 import logging
+import sys
 
 today = datetime.now().strftime("%m-%d-%Y-%H")
 logging.basicConfig(
-    level=logging.DEBUG,
-    filename=f'debug_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.log',
-    format="%(asctime)s-12s %(levelname)s-12s %(message)s",
+    level=logging.WARNING,
+    filename="error.log",
+    format="%(asctime)s: %(levelname)s: %(message)s",
 )
 
 
@@ -66,29 +67,33 @@ def get_groups(cat_response, cat_num):
 
 def fetch_items(url: str):
     s = req.Session()
-    response = requests_retry_session(session=s).get(url)
+    try:
+        response = requests_retry_session(session=s).get(url)
+    except:
+        logging.warning("### Error getting response from items url in fetch_items() ###")
+        e = sys.exc_info()
+        logging.warning(e)
+        logging.warning(url)
+
+
+
     try:
         raw_items = response.json()
-        return(raw_items)
+        return raw_items
     except ValueError as e:
-        logging.debug(e)
-        logging.debug("### Content ###")
-        logging.debug(response)
+        logging.warning("### Error dcecoding json in fetch_items() ###")
+        logging.warning(e)
+        logging.warning(url)
+        logging.warning(response)
         pass
 
 
 # Get the list of items from the each item group page
 def get_items_list(letter, num_pages, cat_num):
-    logging.info(f"Letter: {letter} Pages: {num_pages}")
     for page in range(num_pages):
         url = f"https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category={cat_num}&alpha={letter}&page={page}"
-        logging.info(f"Fetching items from item url. Page: {page}, Letter: {letter}")
         start = time.perf_counter()
-        logging.info(str(url))
         get_single_items(fetch_items(url))
-        logging.info(
-            f"URL Fetch took {round((time.perf_counter() - start), 3)} seconds..."
-        )
 
 
 # Get each item from the item list
@@ -97,9 +102,11 @@ def get_single_items(raw_items):
     try:
         items = json.loads(converted_to_dict)["items"]
         add_to_df(items)
-    except TypeError as e:
-        logging.debug(e)
-        logging.warning("##################################")
+    except:
+        e = sys.exc_info()
+        logging.warning('### Error getting "items" key:value. get_single_items() ###')
+        logging.warning(e)
+        logging.info(converted_to_dict)
         pass
 
 
@@ -118,9 +125,10 @@ def add_to_df(items):
                 "current_price": item["current"]["price"],
                 "members": item["members"],
             }
-            print(f'Adding {item["name"]} to list...')
             items_list.append(item_dict)
-        except JSONDecodeError as e:
+        except:
+            e = sys.exc_info()
+            logging.warning("### Error parsing item to JSON in add_to_df ###")
             logging.warning(e)
             logging.warning(f"{item}")
             pass
@@ -141,11 +149,13 @@ def add_to_df(items):
 # For each category, get the "item groups"
 for i in range(42):
     print(f"Getting Category {i}")
-    
+
     try:
         category_response = req.get(categories_url + str(i)).json()["alpha"]
         get_groups(category_response, i)
-    except json.decoder.JSONDecodeError as e:
+    except:
+        e = sys.exc_info()
+        logging.warning("Error getting response from Category URL in main function")
         logging.debug(e)
         logging.warning(category_response)
 
