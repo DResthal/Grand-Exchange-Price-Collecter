@@ -1,2 +1,3 @@
 - python logging  
 - testing
+- Save to postgres
