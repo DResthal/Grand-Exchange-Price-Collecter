@@ -26,7 +26,9 @@ def check_file_age(file_path: str, max_age: int = 604800) -> None:
 
 # Check if group_urls.csv exists
 # If not, fetch urls
+#     Then fetch items
 # If yes, fetch items
+#
 # Save items to db if not exists
 # Save prices to db
 
