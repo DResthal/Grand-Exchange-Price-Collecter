@@ -4,6 +4,7 @@ import requests as req
 import apifetch.parse_groups
 import json
 import pandas as pd
+import numpy as np
 from datetime import datetime
 import logging
 
