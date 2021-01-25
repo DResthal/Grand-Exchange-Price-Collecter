@@ -10,7 +10,7 @@ class ReqRetry:
         retries: int = 3,
         backoff_factor: float = 0.3,
         status_forcelist: tuple = (500, 502, 504),
-        session: None = None,
+        session=None,
     ):
 
         self.retries = retries

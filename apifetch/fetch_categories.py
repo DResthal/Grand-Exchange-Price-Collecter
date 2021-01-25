@@ -20,7 +20,7 @@ error_log = logging.getLogger("e_log")
 application_log = logging.getLogger("a_log")
 
 
-def log_error(c_msg, err, url="N/A", res="N/A"):
+def log_error(c_msg: str, err: str, url: str = "N/A", res: str = "N/A") -> None:
     custom_message = f"{c_msg}\n\n{err}"
     error_log.warning(custom_message)
     error_log.warning(f"Affected URL: {url}")
@@ -30,20 +30,20 @@ def log_error(c_msg, err, url="N/A", res="N/A"):
 ########################################################################################
 
 application_log.info(
-    f'Starting data scrape: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}'
+    f'Begin fetching categories: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}'
 )
-print(f'Starting data scrape: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}')
+print(f'Begin fetching categories: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}')
 
 categories_url = (
     "https://secure.runescape.com/m=itemdb_rs/api/catalogue/category.json?category="
 )
 
 
-def process_item_groups(cat_resp, cat_num):
+def process_item_groups(cat_resp: list, cat_num: int) -> pd.DataFrame:
     group_list = []
     for group in cat_resp:
         # Skip if no items exist, wasted time
-        if group['items'] == 0:
+        if group["items"] == 0:
             application_log.info(f'Group {group["letter"]} has no items, pass.')
             print(f'Sanity Check: Group {group["letter"]} has no items, pass.')
             pass
@@ -61,14 +61,11 @@ def process_item_groups(cat_resp, cat_num):
                 group.update({"urls": group_urls})
                 group_list.append(group)
 
-
-        
-
     group_list_dataframe = pd.DataFrame(group_list)
     return group_list_dataframe
 
 
-def get_all_categories(n_cats: int):
+def get_all_categories(n_cats: int) -> None:
     columns = ["letter", "items", "num_of_pages", "urls"]
     end_df = pd.DataFrame(columns=columns)
     for i in range(n_cats):

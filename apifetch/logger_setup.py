@@ -5,9 +5,9 @@ import logging
 class CustomLogger:
     def __init__(
         self,
-        name,
-        log_file,
-        level=logging.WARNING,
+        name: str,
+        log_file: str,
+        level: int = logging.WARNING,
         formatter=logging.Formatter("%(asctime)s %(levelname)s %(message)s"),
     ):
         self.name = name
