@@ -44,21 +44,27 @@ categories_url = (
 def process_item_groups(cat_resp, cat_num):
     group_list = []
     for group in cat_resp:
-        # Encode for url
-        url_encoded_group = item_parser.url_encode(group)
-        # Add number of pages
-        with_num_pages = item_parser.add_num_of_pages(url_encoded_group)
+        # Skip if no items exist, wasted time
+        if group['items'] == 0:
+            application_log.info(f'Group {group["letter"]} has no items, pass.')
+            print(f'Sanity Check: Group {group["letter"]} has no items, pass.')
+            pass
+        else:
+            # Encode for url
+            url_encoded_group = item_parser.url_encode(group)
 
-        # Build urls for each page
-        group_urls = []
-        if with_num_pages["num_of_pages"] != 0:
+            # Add number of pages
+            with_num_pages = item_parser.add_num_of_pages(url_encoded_group)
+
+            # Build urls for each page
+            group_urls = []
             for p in range(with_num_pages["num_of_pages"]):
                 group_urls.append(item_parser.build_url(with_num_pages, p + 1, cat_num))
-        else:
-            pass
+                group.update({"urls": group_urls})
+                group_list.append(group)
 
-        group.update({"urls": group_urls})
-        group_list.append(group)
+
+        
 
     group_list_dataframe = pd.DataFrame(group_list)
     return group_list_dataframe
