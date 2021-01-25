@@ -7,10 +7,10 @@ from requests.packages.urllib3.util.retry import Retry
 class ReqRetry:
     def __init__(
         self,
-        retries=3,
-        backoff_factor=0.3,
-        status_forcelist=(500, 502, 504),
-        session=None,
+        retries: int = 3,
+        backoff_factor: float = 0.3,
+        status_forcelist: tuple = (500, 502, 504),
+        session: None = None,
     ):
 
         self.retries = retries

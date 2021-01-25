@@ -9,14 +9,14 @@ error_log = CustomLogger("e_log", "error.log", level=logging.WARNING).create_log
 application_log = CustomLogger("a_log", "app.log", level=logging.INFO).create_logger()
 
 ### Function Definitions ###
-def check_file_age(file_path: str, max_age=604800):
+def check_file_age(file_path: str, max_age: int = 604800) -> None:
     x = os.stat(file_path)
     age = time.time() - x.st_mtime
     print(f"File {file_path} is {age} seconds old.")
 
     if age > max_age:
         application_log.info(f"group_urls.csv is too old, fetching new list")
-        print('Fetching new url list, list is too old.')
+        print("Fetching new url list, list is too old.")
         get_all_categories(43)
     else:
         application_log.info(f"group_urls.csv is less than 7 days old, moving on.")
