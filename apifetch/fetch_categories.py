@@ -1,26 +1,25 @@
 # Fetch groups from categories in api
-from req_retry import ReqRetry
+from apifetch.req_retry import ReqRetry
 import requests as req
-import parse_groups
+import apifetch.parse_groups
 import math
 import json
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from logger_setup import CustomLogger
 import logging
 import sys
 
 today = datetime.now().strftime("%m-%d-%Y")
 retry_session = ReqRetry().retry_session()
 
-item_parser = parse_groups.ItemParser()
+item_parser = apifetch.parse_groups.ItemParser()
 
 ### LOGGING ###
 formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
 
-error_log = CustomLogger("e_log", "error.log", level=logging.WARNING).create_logger()
-application_log = CustomLogger("a_log", "app.log", level=logging.INFO).create_logger()
+error_log = logging.getLogger("e_log")
+application_log = logging.getLogger("a_log")
 
 
 def log_error(c_msg, err, url="N/A", res="N/A"):
@@ -94,10 +93,6 @@ def get_all_categories(n_cats: int):
 
     urls.to_csv("group_urls.csv")
     end_df.to_csv("item_groups.csv")
-
-
-### Main ###
-get_all_categories(43)
 
 
 application_log.info(f'Completed at: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}')
