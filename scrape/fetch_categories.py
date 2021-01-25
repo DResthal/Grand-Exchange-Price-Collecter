@@ -1,7 +1,7 @@
+# Get groups from categories in api
+from req_retry import ReqRetry
 import requests as req
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
-import parse_items
+import items
 import math
 import json
 import pandas as pd
@@ -11,6 +11,7 @@ import logging
 import sys
 
 today = datetime.now().strftime("%m-%d-%Y")
+retry_session = ReqRetry().retry_session()
 
 ### LOGGING ###
 formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
@@ -40,30 +41,6 @@ def log_error(c_msg, err, url="N/A", res="N/A"):
     error_log.warning(f"URL Response: {res}")
 
 
-### Requests retry setup ###
-
-# Create a session, attempt to connect, retry if failed and return if passed
-def requests_retry_session(
-    retries=3,
-    backoff_factor=0.3,
-    status_forcelist=(500, 502, 504),
-    session=None,
-):
-
-    session = session or req.Session()
-    retry = Retry(
-        total=retries,
-        read=retries,
-        connect=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=status_forcelist,
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount("http://", adapter)
-    session.mount("https://", adapter)
-    return session
-
-
 ########################################################################################
 
 application_log.info(
@@ -81,15 +58,15 @@ def process_item_groups(cat_resp, cat_num):
     group_list = []
     for group in cat_resp:
         # Encode for url
-        url_encoded_group = parse_items.url_encode(group)
+        url_encoded_group = items.url_encode(group)
         # Add number of pages
-        with_num_pages = parse_items.add_num_of_pages(url_encoded_group)
+        with_num_pages = items.add_num_of_pages(url_encoded_group)
 
         # Build urls for each page
         group_urls = []
         if with_num_pages["num_of_pages"] != 0:
             for p in range(with_num_pages["num_of_pages"]):
-                group_urls.append(parse_items.build_url(with_num_pages, p + 1, cat_num))
+                group_urls.append(items.build_url(with_num_pages, p + 1, cat_num))
         else:
             pass
 
@@ -100,35 +77,40 @@ def process_item_groups(cat_resp, cat_num):
     return group_list_dataframe
 
 
-### Main Loop (42) ###
-# Empty df for appending all groups
-columns = ['letter', 'items', 'num_of_pages', 'urls']
-end_df = pd.DataFrame(columns=columns)
+def get_all_categories(n_cats: int):
+    columns = ["letter", "items", "num_of_pages", "urls"]
+    end_df = pd.DataFrame(columns=columns)
+    for i in range(n_cats):
+        print(f"Fetching Category {i}")
+        try:
+            # Returns a list of dicts
+            current_url = categories_url + str(i)
+            category_list = retry_session.get(current_url).json()["alpha"]
+            application_log.info(f"Category {i}: \n{category_list}")
+        except req.exceptions.Timeout as e:
+            log_error("Request timeout", e, current_url)
+            pass
+        except req.exceptions.TooManyRedirects as e:
+            log_error("Too Many Redirects, check URL", e, current_url)
+            pass
+        except json.decoder.JSONDecodeError as e:
+            log_error("JSON Decode error", e, current_url, req.get(current_url).content)
+        except req.exceptions.RequestException as e:
+            log_error("Unknown Exception", e, current_url)
+            pass
 
-for i in range(42):
-    print(f"Fetching Category {i}")
-    try:
-        # Returns a list of dicts
-        current_url = categories_url + str(i)
-        category_list = req.get(current_url).json()["alpha"]
-        application_log.info(f"Category {i}: \n{category_list}")
-    except req.exceptions.Timeout as e:
-        log_error("Request timeout", e, current_url)
-        pass
-    except req.exceptions.TooManyRedirects as e:
-        log_error("Too Many Redirects, check URL", e, current_url)
-        pass
-    except json.decoder.JSONDecodeError as e:
-        log_error("JSON Decode error", e, current_url, req.get(current_url).content)
-    except req.exceptions.RequestException as e:
-        log_error("Unknown Exception", e, current_url)
-        pass
+        df = process_item_groups(category_list, i)
+        df = df.replace(0, np.nan).dropna()
+        end_df = pd.concat([end_df, df], sort=False)
+        urls = end_df["urls"].explode("urls")
 
-    df = process_item_groups(category_list, i)
-    df = df.replace(0, np.nan).dropna()
-    end_df = pd.concat([end_df, df], sort=False)
+    urls.to_csv("group_urls.csv")
+    end_df.to_csv("item_groups.csv")
 
-end_df.to_csv('item_groups.csv')
+
+### Main ###
+get_all_categories(43)
+
 
 application_log.info(f'Completed at: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}')
 print(f'Completed at: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}')

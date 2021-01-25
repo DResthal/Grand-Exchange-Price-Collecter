@@ -1,3 +1,4 @@
 - python logging  
 - testing
 - Save to postgres
+- Add exceptions to classes
