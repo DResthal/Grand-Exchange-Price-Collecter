@@ -7,7 +7,7 @@ class CustomLogger:
         self,
         name,
         log_file,
-        level=logging,
+        level=logging.WARNING,
         formatter=logging.Formatter("%(asctime)s %(levelname)s %(message)s"),
     ):
         self.name = name
@@ -15,7 +15,7 @@ class CustomLogger:
         self.level = level
         self.formatter = formatter
 
-    def create_logger():
+    def create_logger(self):
         handler = logging.FileHandler(self.log_file)
         handler.setFormatter(self.formatter)
         logger = logging.getLogger(self.name)

@@ -7,7 +7,7 @@ application_log = logging.getLogger("a_log")
 
 
 class ItemParser:
-    def url_encode(group: dict) -> dict:
+    def url_encode(self, group: dict) -> dict:
         application_log.info("Checking for url compatibility...")
         if group["letter"] == "#":
             application_log.info(
@@ -18,7 +18,7 @@ class ItemParser:
             application_log.info(f"URL Encoding not-needed for {group}")
         return group
 
-    def add_num_of_pages(group: dict) -> dict:
+    def add_num_of_pages(self, group: dict) -> dict:
         num_of_items = group["items"]
 
         if num_of_items == 0:
@@ -29,7 +29,7 @@ class ItemParser:
 
         return group
 
-    def build_url(group: dict, page: int, cat_num: int) -> dict:
+    def build_url(self, group: dict, page: int, cat_num: int) -> dict:
         letter = group["letter"]
         url = f"https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category={cat_num}&alpha={letter}&page={page}"
         return url
