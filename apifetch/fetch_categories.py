@@ -2,13 +2,10 @@
 from apifetch.req_retry import ReqRetry
 import requests as req
 import apifetch.parse_groups
-import math
 import json
 import pandas as pd
-import numpy as np
 from datetime import datetime
 import logging
-import sys
 
 today = datetime.now().strftime("%m-%d-%Y")
 retry_session = ReqRetry().retry_session()
