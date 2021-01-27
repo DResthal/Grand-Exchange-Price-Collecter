@@ -29,16 +29,6 @@ def log_error(c_msg: str, err: str, url: str = "N/A", res: str = "N/A") -> None:
         error_log.warning(f"Affected URL: {url}")
         error_log.warning(f"URL Response: {res}")
 
-application_log.info(
-    f'Begin fetching categories: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}'
-)
-print(f'Begin fetching categories: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}')
-
-categories_url = (
-    "https://secure.runescape.com/m=itemdb_rs/api/catalogue/category.json?category="
-)
-
-
 def process_item_groups(cat_resp: list, cat_num: int) -> pd.DataFrame:
     group_list = []
     for group in cat_resp:
