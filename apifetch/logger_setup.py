@@ -1,6 +1,6 @@
 # Provide an easy way to setup multiple loggers (only for remaining DRY)
 import logging
-
+import sys
 
 class CustomLogger:
     def __init__(
@@ -16,10 +16,15 @@ class CustomLogger:
         self.formatter = formatter
 
     def create_logger(self):
-        handler = logging.FileHandler(self.log_file)
-        handler.setFormatter(self.formatter)
+        file_handler = logging.FileHandler(self.log_file)
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        file_handler.setFormatter(self.formatter)
+        stdout_handler.setFormatter(self.formatter)
         logger = logging.getLogger(self.name)
         logger.setLevel(self.level)
-        logger.addHandler(handler)
+        logger.addHandler(file_handler)
+        logger.addHandler(stdout_handler)
 
         return logger
+
+    
