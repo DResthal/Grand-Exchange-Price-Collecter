@@ -1,5 +1,6 @@
 # Fetch groups from categories in api
 from apifetch.req_retry import ReqRetry
+from apifetch.logger_setup import CustomLogger
 import requests as req
 import apifetch.parse_groups
 import json
@@ -20,14 +21,13 @@ error_log = logging.getLogger("e_log")
 application_log = logging.getLogger("a_log")
 
 
-def log_error(c_msg: str, err: str, url: str = "N/A", res: str = "N/A") -> None:
-    custom_message = f"{c_msg}\n\n{err}"
-    error_log.warning(custom_message)
-    error_log.warning(f"Affected URL: {url}")
-    error_log.warning(f"URL Response: {res}")
-
-
 ########################################################################################
+
+def log_error(c_msg: str, err: str, url: str = "N/A", res: str = "N/A") -> None:
+        custom_message = f"{c_msg}\n\n{err}"
+        error_log.warning(custom_message)
+        error_log.warning(f"Affected URL: {url}")
+        error_log.warning(f"URL Response: {res}")
 
 application_log.info(
     f'Begin fetching categories: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}'
@@ -65,7 +65,7 @@ def process_item_groups(cat_resp: list, cat_num: int) -> pd.DataFrame:
     return group_list_dataframe
 
 
-def get_all_categories(n_cats: int) -> None:
+def get_all_categories(n_cats: int=43) -> None:
     columns = ["letter", "items", "num_of_pages", "urls"]
     end_df = pd.DataFrame(columns=columns)
     for i in range(n_cats):
@@ -91,9 +91,12 @@ def get_all_categories(n_cats: int) -> None:
         df = df.replace(0, np.nan).dropna()
         end_df = pd.concat([end_df, df], sort=False)
         urls = end_df["urls"].explode("urls")
+        urls = urls.drop_duplicates()
 
+    # Save all api urls to csv
     urls.to_csv("group_urls.csv")
-    end_df.to_csv("item_groups.csv")
+    # Save all groups and their respective api urls to csv
+    # end_df.to_csv("item_groups.csv")
 
 
 application_log.info(f'Completed at: {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}')
