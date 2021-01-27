@@ -13,43 +13,47 @@ application_log = CustomLogger("a_log", "app.log", level=logging.INFO).create_lo
 
 ### Function Definitions ###
 
+
 def log_error(c_msg: str, err: str, url: str = "N/A", res: str = "N/A") -> None:
-        custom_message = f"{c_msg}\n\n{err}"
-        error_log.warning(custom_message)
-        error_log.warning(f"Affected URL: {url}")
-        error_log.warning(f"URL Response: {res}")
-        
+    custom_message = f"{c_msg}\n\n{err}"
+    error_log.warning(custom_message)
+    error_log.warning(f"Affected URL: {url}")
+    error_log.warning(f"URL Response: {res}")
+
+
 def file_is_old(file_path: str, max_age: int = 604800) -> None:
-    '''max_age is in seconds
+    """max_age is in seconds
 
     minute = 60
     hour   = 3600
     12 hrs = 43200
     day    = 86400
     week   = 604800
-    '''
+    """
     x = os.stat(file_path)
     age = time.time() - x.st_mtime
     print(f"File {file_path} is {age} seconds old.")
-    
+
     if age > max_age:
         application_log.info(f"File {file_path} is too old, generating new file.")
         return True
     else:
-        application_log.info(f"File {file_path} is too new to replace, skipping file generation")
+        application_log.info(
+            f"File {file_path} is too new to replace, skipping file generation"
+        )
         return False
+
 
 def fetch_group_responses():
     try:
         item_json_df = idf.urls.apply(FetchItems.fetch_item_json)
         print(item_json_df.describe())
-        item_json_df.to_csv('group_url_responses.csv')
+        item_json_df.to_csv("group_url_responses.csv")
     except TypeError as e:
         print(e)
     except:
         e = sys.exc_info()
         print(e)
-
 
 
 url_file_path = os.path.abspath("group_urls.csv")
@@ -64,11 +68,13 @@ elif file_is_old(url_file_path):
     application_log.info("groups_urls.csv exists, checking age")
     get_all_categories()
 else:
-    application_log.info("groups_urls.csv exists and is not old enough to update/replace. ")
+    application_log.info(
+        "groups_urls.csv exists and is not old enough to update/replace. "
+    )
 
 
 try:
-    idf = pd.read_csv('group_urls.csv')
+    idf = pd.read_csv("group_urls.csv")
 except:
     e = sys.exc_info()
     print(e)
@@ -77,7 +83,7 @@ except:
 # Check age
 # Generate file if none exists or too old.
 if not os.path.exists(group_url_response_file_path):
-    print('NO RESPONSE FILE EXISTS\n Generating new file... This WILL take a while!')
+    print("NO RESPONSE FILE EXISTS\n Generating new file... This WILL take a while!")
     fetch_group_responses()
 elif file_is_old(group_url_response_file_path, 43200):
     fetch_group_responses()
@@ -85,6 +91,3 @@ else:
     pass
 
 print(f'Application finished: {datetime.now().strftime("%m-%d-%Y_%H_%M_%S")}')
-
-    
-

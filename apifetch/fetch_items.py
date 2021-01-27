@@ -16,11 +16,12 @@ application_log = logging.getLogger("a_log")
 
 retry_session = ReqRetry().retry_session()
 
+
 def log_error(c_msg: str, err: str, url: str = "N/A", res: str = "N/A") -> None:
-        custom_message = f"{c_msg}\n\n{err}"
-        error_log.warning(custom_message)
-        error_log.warning(f"Affected URL: {url}")
-        error_log.warning(f"URL Response: {res}")
+    custom_message = f"{c_msg}\n\n{err}"
+    error_log.warning(custom_message)
+    error_log.warning(f"Affected URL: {url}")
+    error_log.warning(f"URL Response: {res}")
 
 
 class FetchItems:
@@ -28,16 +29,15 @@ class FetchItems:
         pass
 
     def fetch_item_json(url: str) -> dict:
-        print(f'Fetching: {url}')
+        print(f"Fetching: {url}")
         try:
             item = retry_session.get(url).json()
         except json.JSONDecodeError as e:
-            log_error(f'JSON Error in fetch_item_json', e, url=url)
+            log_error(f"JSON Error in fetch_item_json", e, url=url)
             print()
             pass
         except:
-            log_error(f'Unknown Exception', sys.exc_info(), url=url)
+            log_error(f"Unknown Exception", sys.exc_info(), url=url)
             pass
 
         return item
-        

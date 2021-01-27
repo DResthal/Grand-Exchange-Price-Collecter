@@ -23,11 +23,13 @@ application_log = logging.getLogger("a_log")
 
 ########################################################################################
 
+
 def log_error(c_msg: str, err: str, url: str = "N/A", res: str = "N/A") -> None:
-        custom_message = f"{c_msg}\n\n{err}"
-        error_log.warning(custom_message)
-        error_log.warning(f"Affected URL: {url}")
-        error_log.warning(f"URL Response: {res}")
+    custom_message = f"{c_msg}\n\n{err}"
+    error_log.warning(custom_message)
+    error_log.warning(f"Affected URL: {url}")
+    error_log.warning(f"URL Response: {res}")
+
 
 def process_item_groups(cat_resp: list, cat_num: int) -> pd.DataFrame:
     group_list = []
@@ -55,7 +57,7 @@ def process_item_groups(cat_resp: list, cat_num: int) -> pd.DataFrame:
     return group_list_dataframe
 
 
-def get_all_categories(n_cats: int=43) -> None:
+def get_all_categories(n_cats: int = 43) -> None:
     columns = ["letter", "items", "num_of_pages", "urls"]
     end_df = pd.DataFrame(columns=columns)
     for i in range(n_cats):

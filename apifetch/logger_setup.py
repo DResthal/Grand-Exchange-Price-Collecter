@@ -2,6 +2,7 @@
 import logging
 import sys
 
+
 class CustomLogger:
     def __init__(
         self,
@@ -26,5 +27,3 @@ class CustomLogger:
         logger.addHandler(stdout_handler)
 
         return logger
-
-    
