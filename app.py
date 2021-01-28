@@ -49,10 +49,10 @@ def fetch_group_responses():
     now = datetime.now().strftime("%m-%d-%Y-%H-%M")
     file_name = f'all_items_{now}.csv'
     try:
-        old_df = idf.urls.apply(FetchItems.fetch_item_json)
-        old_df = old_df.explode()
-        items_df = pd.concat([old_df[1].apply(pd.Series)], axis=1)
-        items_df.to_csv(file_name)
+        temp = ser.apply(FetchItems.fetch_item_json)
+        temp = temp.T
+        df = pd.json_normalize(temp[0])
+        df.to_csv(file_name)
     except TypeError as e:
         print(e)
     except:
@@ -79,6 +79,8 @@ else:
 
 try:
     idf = pd.read_csv("group_urls.csv")
+    print(f'idf type: {type(idf)}')
+    ser = idf['urls']
 except:
     e = sys.exc_info()
     print(e)

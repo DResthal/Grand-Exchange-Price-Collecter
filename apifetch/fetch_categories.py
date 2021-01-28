@@ -60,7 +60,7 @@ def process_item_groups(cat_resp: list, cat_num: int) -> pd.DataFrame:
     return group_list_dataframe
 
 
-def get_all_categories(n_cats: int = 43) -> None:
+def get_all_categories(n_cats: int = 42) -> None:
     columns = ["letter", "items", "num_of_pages", "urls"]
     end_df = pd.DataFrame(columns=columns)
     for i in range(n_cats):

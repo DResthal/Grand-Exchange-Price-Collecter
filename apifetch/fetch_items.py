@@ -28,15 +28,38 @@ class FetchItems:
     def __init__(self):
         pass
 
-    def fetch_item_json(url: str) -> dict:
+    def fetch_item_json(url: str, retries: int=3) -> pd.DataFrame:
         print(f"Fetching: {url}")
         try:
-            item = retry_session.get(url).json()
-            return item['items']
+            items = retry_session.get(url).json()['items']
+            item_list = []
+            for i in items:
+                item = {
+                    'icon': i['icon'],
+                    'icon_large': i['icon_large'],
+                    'id': i['id'],
+                    'type': i['type'],
+                    'typeIcon': i['typeIcon'],
+                    'name': i['name'],
+                    'description': i['description'],
+                    'current': i['current'],
+                    'today': i['today'],
+                    'members': i['members']
+                }
+                item_list.append(item)
+
+            return(pd.Series(item_list))
+                
+                
+            
         except json.JSONDecodeError as e:
             log_error(f"JSON Error in fetch_item_json", e, url=url)
-            print()
-            pass
+            if retries < 3:
+                time.wait(1)
+                fetch_item_json(url)
+            else:
+                log_error(f"Unable to receive JSON response after 3 attempts", e, url=url, res=retry_session.get(url).content())
+                pass
         except:
             log_error(f"Unknown Exception", sys.exc_info(), url=url)
             pass
