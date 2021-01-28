@@ -2,6 +2,7 @@
 from apifetch.fetch_categories import get_all_categories
 from apifetch.logger_setup import CustomLogger
 from apifetch.fetch_items import FetchItems
+from datetime import datetime
 import pandas as pd
 import sys
 import logging
@@ -45,10 +46,13 @@ def file_is_old(file_path: str, max_age: int = 604800) -> None:
 
 
 def fetch_group_responses():
+    now = datetime.now().strftime("%m-%d-%Y-%H-%M")
+    file_name = f'all_items_{now}.csv'
     try:
-        item_json_df = idf.urls.apply(FetchItems.fetch_item_json)
-        print(item_json_df.describe())
-        item_json_df.to_csv("group_url_responses.csv")
+        old_df = idf.urls.apply(FetchItems.fetch_item_json)
+        old_df = old_df.explode()
+        items_df = pd.concat([old_df[1].apply(pd.Series)], axis=1)
+        items_df.to_csv(file_name)
     except TypeError as e:
         print(e)
     except:
