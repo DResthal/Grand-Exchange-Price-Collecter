@@ -32,6 +32,7 @@ class FetchItems:
         print(f"Fetching: {url}")
         try:
             item = retry_session.get(url).json()
+            return item['items']
         except json.JSONDecodeError as e:
             log_error(f"JSON Error in fetch_item_json", e, url=url)
             print()
@@ -39,5 +40,3 @@ class FetchItems:
         except:
             log_error(f"Unknown Exception", sys.exc_info(), url=url)
             pass
-
-        return item
