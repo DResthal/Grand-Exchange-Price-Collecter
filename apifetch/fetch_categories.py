@@ -20,6 +20,9 @@ formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
 error_log = logging.getLogger("e_log")
 application_log = logging.getLogger("a_log")
 
+categories_url = (
+    "https://secure.runescape.com/m=itemdb_rs/api/catalogue/category.json?category="
+)
 
 ########################################################################################
 
