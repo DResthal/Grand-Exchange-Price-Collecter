@@ -16,7 +16,6 @@ application_log = logging.getLogger("a_log")
 
 retry_session = ReqRetry().retry_session()
 
-
 def log_error(c_msg: str, err: str, url: str = "N/A", res: str = "N/A") -> None:
     custom_message = f"{c_msg}\n\n{err}"
     error_log.warning(custom_message)

@@ -3,6 +3,7 @@ from apifetch.fetch_categories import get_all_categories
 from apifetch.logger_setup import CustomLogger
 from apifetch.fetch_items import FetchItems
 from datetime import datetime
+from pandarallel import pandarallel
 import pandas as pd
 import sys
 import logging
@@ -46,10 +47,12 @@ def file_is_old(file_path: str, max_age: int = 604800) -> None:
 
 
 def fetch_group_responses():
+    pandarallel.initialize(progress_bar=True)
+
     now = datetime.now().strftime("%m-%d-%Y-%H-%M")
     file_name = f'all_items_{now}.csv'
     try:
-        temp = ser.apply(FetchItems.fetch_item_json)
+        temp = ser.parallel_apply(FetchItems.fetch_item_json)
         temp = temp.T
         df = pd.json_normalize(temp[0])
         df.to_csv(file_name)
