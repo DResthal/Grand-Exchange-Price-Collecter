@@ -6,6 +6,7 @@ import numpy as np
 from datetime import datetime
 import logging
 import sys
+import traceback
 import json
 import os
 
@@ -16,21 +17,32 @@ application_log = logging.getLogger("a_log")
 
 retry_session = ReqRetry().retry_session()
 
-def log_error(c_msg: str, err: str, url: str = "N/A", res: str = "N/A") -> None:
-    custom_message = f"{c_msg}\n\n{err}"
+def log_error(c_msg: str, *err: str, url: str = "N/A", res: str = "N/A") -> None:
+    custom_message = f"{c_msg}\n{err}"
     error_log.warning(custom_message)
     error_log.warning(f"Affected URL: {url}")
-    error_log.warning(f"URL Response: {res}")
+    error_log.warning(f"URL Response: {res}\n\n\n")
 
 
 class FetchItems:
     def __init__(self):
-        pass
+        self.now = datetime.now().strftime("%m-%d-%Y-%H")
+        self.file_name = f'all_items_{self.now}.csv'
+        self.file_path = os.path.abspath(self.file_name)
 
-    def fetch_item_json(url: str, retries: int=3) -> pd.DataFrame:
+    def save_items_to_csv(self, df: pd.DataFrame) -> None:
+        if os.path.exists(self.file_path):
+            df.to_csv(self.file_name, header=False, mode='a')
+        else:
+            df.to_csv(self.file_name, header=True, mode='a')
+
+    def fetch_item_json(self, url: str, n_tries: int=3) -> pd.DataFrame:
         print(f"Fetching: {url}")
         try:
-            items = retry_session.get(url).json()['items']
+            res = retry_session.get(url)
+            res.encoding = 'ISO-8859-1'
+            items = res.json()['items']
+            items = json.loads(json.dumps(items))
             item_list = []
             for i in items:
                 item = {
@@ -46,19 +58,22 @@ class FetchItems:
                     'members': i['members']
                 }
                 item_list.append(item)
-
-            return(pd.Series(item_list))
-                
-                
             
-        except json.JSONDecodeError as e:
-            log_error(f"JSON Error in fetch_item_json", e, url=url)
-            if retries < 3:
-                time.wait(1)
-                fetch_item_json(url)
+            df = pd.DataFrame(item_list)
+            if df.columns.values.any():
+                df = df.set_index('id')
+                self.save_items_to_csv(df)
             else:
-                log_error(f"Unable to receive JSON response after 3 attempts", e, url=url, res=retry_session.get(url).content())
                 pass
+            
+        # This needs to be broken out, however previous except blocks here failed repeatedly
+        # So I am condensing for now, logging errors and will break out as errors appear
         except:
-            log_error(f"Unknown Exception", sys.exc_info(), url=url)
+            res_text = ''
+            if res.text:
+                res_text = f'{str(res.headers)}\nTEXT: {str(res.text)}\n'
+            if res.content:
+                res_text = f'{str(res.headers)}\nCONTENT: {str(res.content)}\n'
+            log_error(res_text, sys.exc_info(), url=url)
             pass
+              

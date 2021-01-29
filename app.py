@@ -47,15 +47,11 @@ def file_is_old(file_path: str, max_age: int = 604800) -> None:
 
 
 def fetch_group_responses():
-    pandarallel.initialize(progress_bar=True)
-
-    now = datetime.now().strftime("%m-%d-%Y-%H-%M")
-    file_name = f'all_items_{now}.csv'
+    pandarallel.initialize()
+    fetcher = FetchItems()
     try:
-        temp = ser.parallel_apply(FetchItems.fetch_item_json)
-        temp = temp.T
-        df = pd.json_normalize(temp[0])
-        df.to_csv(file_name)
+        # temp = ser.parallel_apply(fetcher.fetch_item_json)
+        temp = ser.apply(fetcher.fetch_item_json)
     except TypeError as e:
         print(e)
     except:
