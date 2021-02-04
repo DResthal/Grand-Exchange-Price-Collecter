@@ -62,7 +62,7 @@ class FetchItems:
             df = pd.DataFrame(item_list)
             if df.columns.values.any():
                 df = df.set_index('id')
-                self.save_items_to_csv(df)
+                self.save_items_to_csv(df, mode="a")
             else:
                 pass
             
