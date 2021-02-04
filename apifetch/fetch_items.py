@@ -74,6 +74,6 @@ class FetchItems:
                 res_text = f'{str(res.headers)}\nTEXT: {str(res.text)}\n'
             if res.content:
                 res_text = f'{str(res.headers)}\nCONTENT: {str(res.content)}\n'
-            log_error(res_text, sys.exc_info(), url=url)
+            log_error('unknown error in item url resolution...', sys.exc_info(), url=url, res=res_text)
             pass
               
