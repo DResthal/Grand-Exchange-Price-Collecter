@@ -60,11 +60,9 @@ class FetchItems:
                 item_list.append(item)
             
             df = pd.DataFrame(item_list)
-            if df.columns.values.any():
-                df = df.set_index('id')
-                self.save_items_to_csv(df, mode="a")
-            else:
-                pass
+            df = df.set_index('id')
+            self.save_items_to_csv(df)
+            
             
         # This needs to be broken out, however previous except blocks here failed repeatedly
         # So I am condensing for now, logging errors and will break out as errors appear
