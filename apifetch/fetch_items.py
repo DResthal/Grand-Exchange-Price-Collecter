@@ -27,10 +27,16 @@ def log_error(c_msg: str, *err: str, url: str = "N/A", res: str = "N/A") -> None
 class FetchItems:
     def __init__(self):
         self.now = datetime.now().strftime("%m-%d-%Y-%H")
-        self.file_name = f'all_items_{self.now}.csv'
-        self.file_path = os.path.abspath(self.file_name)
 
 
+    def save_csv(self, df, filename):
+        filename = f'{filename}_{self.now}.csv'
+        if os.path.exists(filename):
+            df.to_csv(filename, header=False, mode="a")
+        else:
+            df.to_csv(filename, header=True, mode="w")
+
+        
     def fetch_item_json(self, url: str, n_tries: int=3) -> pd.DataFrame:
         application_log.info(f'Fetching: {url}')
 
@@ -72,8 +78,8 @@ class FetchItems:
             price_df = price_df.set_index('ItemID')
             
 
-            item_df.to_csv('Items.csv', header=False, mode='a')
-            price_df.to_csv('Prices.csv', header=False, mode='a')
+            self.save_csv(item_df, 'items')
+            self.save_csv(price_df, 'prices')
 
             print('fetch_item_json Completed!')
             

@@ -47,7 +47,7 @@ def file_is_old(file_path: str, max_age: int = 604800) -> None:
 
 
 def fetch_group_responses():
-    pandarallel.initialize()
+    # pandarallel.initialize()
     fetcher = FetchItems()
     try:
         # temp = ser.parallel_apply(fetcher.fetch_item_json)
