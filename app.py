@@ -3,7 +3,7 @@ from apifetch.fetch_categories import get_all_categories
 from apifetch.logger_setup import CustomLogger
 from apifetch.fetch_items import FetchItems
 from datetime import datetime
-from pandarallel import pandarallel
+# from pandarallel import pandarallel
 import pandas as pd
 import sys
 import logging
@@ -47,7 +47,7 @@ def file_is_old(file_path: str, max_age: int = 604800) -> None:
 
 
 def fetch_group_responses():
-    pandarallel.initialize()
+    # pandarallel.initialize()
     fetcher = FetchItems()
     try:
         # temp = ser.parallel_apply(fetcher.fetch_item_json)

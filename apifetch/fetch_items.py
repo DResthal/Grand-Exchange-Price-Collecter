@@ -27,44 +27,74 @@ def log_error(c_msg: str, *err: str, url: str = "N/A", res: str = "N/A") -> None
 class FetchItems:
     def __init__(self):
         self.now = datetime.now().strftime("%m-%d-%Y-%H")
-        self.file_name = f'all_items_{self.now}.csv'
-        self.file_path = os.path.abspath(self.file_name)
 
-    def save_items_to_csv(self, df: pd.DataFrame) -> None:
-        if os.path.exists(self.file_path):
-            df.to_csv(self.file_name, header=False, mode='a')
+
+    def save_csv(self, df, filename):
+        filename = f'{filename}_{self.now}.csv'
+        if os.path.exists(filename):
+            df.to_csv(filename, header=False, mode="a")
         else:
-            df.to_csv(self.file_name, header=True, mode='a')
+            df.to_csv(filename, header=True, mode="w")
 
+        
     def fetch_item_json(self, url: str, n_tries: int=3) -> pd.DataFrame:
-        print(f"Fetching: {url}")
+        application_log.info(f'Fetching: {url}')
+
         try:
             res = retry_session.get(url)
             res.encoding = 'ISO-8859-1'
             items = res.json()['items']
+            # Validates JSON but returns in dict form and not string
             items = json.loads(json.dumps(items))
-            item_list = []
+
+            items_list = []
+            price_list = []
+
             for i in items:
+
                 item = {
-                    'icon': i['icon'],
-                    'icon_large': i['icon_large'],
-                    'id': i['id'],
-                    'type': i['type'],
-                    'typeIcon': i['typeIcon'],
-                    'name': i['name'],
-                    'description': i['description'],
-                    'current': i['current'],
-                    'today': i['today'],
-                    'members': i['members']
+                    'ItemID'     : i['id'],
+                    'Icon'       : i['icon'],
+                    'Type'       : i['type'],
+                    'Name'       : i['name'],
+                    'Description': i['description'],
+                    'IsMembers'  : i['members']
                 }
-                item_list.append(item)
+
+                price = {
+                    'ItemID'     : i['id'],
+                    'Price'      : i['current']['price'],
+                    'Trend'      : i['today']['trend'],
+                    'ChangeToday': i['today']['price']
+                }
+
+                items_list.append(item)
+                price_list.append(price)
+
+            item_df = pd.DataFrame(items_list)
+            item_df = item_df.set_index('ItemID')
+
+            price_df = pd.DataFrame(price_list)
+            price_df = price_df.set_index('ItemID')
             
+
+            self.save_csv(item_df, 'items')
+            self.save_csv(price_df, 'prices')
+
+            print('fetch_item_json Completed!')
+            
+            '''
+            Old way of saving all items to the csv
+            I now, instead, want to save items to a database table "Items" (no overwrites)
+            and save prices to a table "Price" including today's date
+
             df = pd.DataFrame(item_list)
             if df.columns.values.any():
                 df = df.set_index('id')
                 self.save_items_to_csv(df)
             else:
                 pass
+            '''
             
         # This needs to be broken out, however previous except blocks here failed repeatedly
         # So I am condensing for now, logging errors and will break out as errors appear
