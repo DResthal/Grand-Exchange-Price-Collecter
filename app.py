@@ -13,8 +13,8 @@ import os
 
 load_dotenv()
 
-error_log = CustomLogger("e_log", "error.log", level=logging.WARNING).create_logger()
-application_log = CustomLogger("a_log", "app.log", level=logging.INFO).create_logger()
+error_log = CustomLogger("e_log", "logs/error/e.log", level=logging.WARNING).create_logger()
+application_log = CustomLogger("a_log", "logs/app/a.log", level=logging.INFO).create_logger()
 
 ### Function Definitions ###
 

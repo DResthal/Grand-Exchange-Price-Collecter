@@ -30,7 +30,7 @@ def log_error(c_msg: str, *err: str, url: str = "N/A", res: str = "N/A") -> None
 
 class FetchItems:
     def __init__(self):
-        self.now = datetime.now().strftime("%m-%d-%Y-%H")
+        self.now = datetime.now().strftime("%m-%d-%Y")
 
     def save_csv(self, df, filename):
         filename = f"{filename}_{self.now}.csv"
@@ -94,7 +94,7 @@ class FetchItems:
 
                 price = {
                     "item_id": i["id"],
-                    "date": self.now,
+                    "date": datetime.now().strftime("%Y-%m-%d"),
                     "price": i["current"]["price"],
                     "trend": i["today"]["trend"],
                     "change_today": i["today"]["price"],
@@ -113,8 +113,8 @@ class FetchItems:
             price_df["change_today"] = price_df.change_today.apply(self.convert_to_int)
             price_df["date"] = pd.to_datetime(price_df["date"], infer_datetime_format=True)
 
-            self.save_csv(item_df, "items")
-            self.save_csv(price_df, "prices")
+            self.save_csv(item_df, "items.csv")
+            self.save_csv(price_df, "prices.csv")
 
             try:
                 engine = create_engine(
