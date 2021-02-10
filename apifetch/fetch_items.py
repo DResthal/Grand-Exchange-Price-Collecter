@@ -111,15 +111,29 @@ class FetchItems:
             # Convert K and M to 1000 and 1000000
             price_df["price"] = price_df.price.apply(self.convert_to_int)
             price_df["change_today"] = price_df.change_today.apply(self.convert_to_int)
+            price_df["date"] = pd.to_datetime(price_df["date"], infer_datetime_format=True)
 
             self.save_csv(item_df, "items")
             self.save_csv(price_df, "prices")
 
-            engine = create_engine(
-                f"postgresql://{os.getenv('DBUSER')}:{os.getenv('DBPASS')}@localhost:5432/grandexchange"
-            )
-            item_df.to_sql("items", con=engine, if_exists="append")
-            price_df.to_sql("prices", con=engine, if_exists="append")
+            try:
+                engine = create_engine(
+                    f"postgresql://{os.getenv('DBUSER')}:{os.getenv('DBPASS')}@localhost:5432/grandexchange"
+                )
+            except:
+                e = sys.exc_info()
+                print(e)
+            try:
+                item_df.to_sql("items", con=engine, if_exists="append")
+            except:
+                e = sys.exc_info()
+                print(e)
+
+            try:
+                price_df.to_sql("prices", con=engine, if_exists="append")
+            except:
+                e = sys.exc_info()
+                print(e)
 
         # This needs to be broken out, however previous except blocks here failed repeatedly
         # So I am condensing for now, logging errors and will break out as errors appear
