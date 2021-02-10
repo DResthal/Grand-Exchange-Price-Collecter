@@ -114,7 +114,7 @@ class FetchItems:
             self.save_csv(price_df, 'prices')
             
             '''
-            engine = create_engine('postgresql://nclack:Fuckp@ssw0rds@localhost:5432/grandexchange')
+            engine = create_engine('postgresql://username:password@localhost:5432/grandexchange')
             item_df.to_sql('item', con=engine, if_exists='append')
             price_df.to_sql('price', con=engine, if_exists='append')
             '''
