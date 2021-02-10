@@ -10,7 +10,7 @@ import traceback
 import json
 import os
 from sqlalchemy import create_engine 
-import psycopg2 
+import psycopg2
 
 # base_url = "https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category=0&alpha=a&page=1"
 
@@ -40,9 +40,9 @@ class FetchItems:
 
     def convert_to_int(self, x):
         
-        if type(x) = int:
-            pass
-        else:
+        try:
+            int(x)
+        except ValueError as e:
             x = x.strip()
             x = x.replace(' ', '').replace(',', '')
             
@@ -63,8 +63,9 @@ class FetchItems:
                 num = num * 10**9
             else:
                 num = int(x)
-
             return(int(num))
+
+        return(int(x))
 
         
     def fetch_item_json(self, url: str, n_tries: int=3) -> pd.DataFrame:
@@ -113,25 +114,10 @@ class FetchItems:
             self.save_csv(item_df, 'items')
             self.save_csv(price_df, 'prices')
             
-            '''
-            engine = create_engine('postgresql://username:password@localhost:5432/grandexchange')
+            
+            engine = create_engine(f"postgresql://{os.getenv('DBUSER')}:{os.getenv('DBPASS')}@localhost:5432/grandexchange")
             item_df.to_sql('item', con=engine, if_exists='append')
             price_df.to_sql('price', con=engine, if_exists='append')
-            '''
-            print('fetch_item_json Completed!')
-            
-            '''
-            Old way of saving all items to the csv
-            I now, instead, want to save items to a database table "Items" (no overwrites)
-            and save prices to a table "Price" including today's date
-
-            df = pd.DataFrame(item_list)
-            if df.columns.values.any():
-                df = df.set_index('id')
-                self.save_items_to_csv(df)
-            else:
-                pass
-            '''
             
         # This needs to be broken out, however previous except blocks here failed repeatedly
         # So I am condensing for now, logging errors and will break out as errors appear

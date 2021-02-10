@@ -3,12 +3,15 @@ from apifetch.fetch_categories import get_all_categories
 from apifetch.logger_setup import CustomLogger
 from apifetch.fetch_items import FetchItems
 from datetime import datetime
+from dotenv import load_dotenv
 # from pandarallel import pandarallel
 import pandas as pd
 import sys
 import logging
 import time
 import os
+
+load_dotenv()
 
 error_log = CustomLogger("e_log", "error.log", level=logging.WARNING).create_logger()
 application_log = CustomLogger("a_log", "app.log", level=logging.INFO).create_logger()
