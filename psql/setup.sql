@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS item (
-	ItemID integer PRIMARY KEY,
-	Icon text NOT NULL,
-	Type text NOT NULL,
-	Name varchar(100) NOT NULL,
-	Description text NOT NULL,
-	IsMembers bool NOT NULL);
+	item_id integer PRIMARY KEY,
+	icon text NOT NULL,
+	type text NOT NULL,
+	name varchar(100) NOT NULL,
+	description text NOT NULL,
+	is_members bool NOT NULL);
 
 CREATE TABLE IF NOT EXISTS price (
 	/*
@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS price (
 		the item from having more than one price entry.
 		The answer here is a compound key of Date and ItemID!
 	*/
-	ItemID integer NOT NULL,
-	Date date NOT NULL,
-	Price integer NOT NULL,
-	Trend varchar(12) NOT NULL,
-	ChangeToday integer NOT NULL,
-	PRIMARY KEY (ItemID, Date));
+	item_id integer NOT NULL,
+	date date NOT NULL,
+	price integer NOT NULL,
+	trend varchar(12) NOT NULL,
+	change_today integer NOT NULL,
+	PRIMARY KEY (item_id, date));

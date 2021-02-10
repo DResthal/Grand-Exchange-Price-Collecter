@@ -9,6 +9,8 @@ import sys
 import traceback
 import json
 import os
+from sqlalchemy import create_engine 
+import psycopg2 
 
 # base_url = "https://secure.runescape.com/m=itemdb_rs/api/catalogue/items.json?category=0&alpha=a&page=1"
 
@@ -36,6 +38,34 @@ class FetchItems:
         else:
             df.to_csv(filename, header=True, mode="w")
 
+    def convert_to_int(self, x):
+        
+        if type(x) = int:
+            pass
+        else:
+            x = x.strip()
+            x = x.replace(' ', '').replace(',', '')
+            
+            if "k" in x:
+                lett = x[-1].upper()
+                num = x[:-1]
+                num = float(num)
+                num = num * 10**3
+            elif "m" in x:
+                lett = x[-1].upper()
+                num = x[:-1]
+                num = float(num)
+                num = num * 10**6
+            elif "b" in x:
+                lett = x[-1].upper()
+                num = x[:-1]
+                num = float(num)
+                num = num * 10**9
+            else:
+                num = int(x)
+
+            return(int(num))
+
         
     def fetch_item_json(self, url: str, n_tries: int=3) -> pd.DataFrame:
         application_log.info(f'Fetching: {url}')
@@ -53,34 +83,41 @@ class FetchItems:
             for i in items:
 
                 item = {
-                    'ItemID'     : i['id'],
-                    'Icon'       : i['icon'],
-                    'Type'       : i['type'],
-                    'Name'       : i['name'],
-                    'Description': i['description'],
-                    'IsMembers'  : i['members']
+                    'item_id'    : i['id'],
+                    'icon'       : i['icon'],
+                    'item_type'  : i['type'],
+                    'name'       : i['name'],
+                    'description': i['description'],
+                    'is_members' : i['members']
                 }
 
                 price = {
-                    'ItemID'     : i['id'],
-                    'Price'      : i['current']['price'],
-                    'Trend'      : i['today']['trend'],
-                    'ChangeToday': i['today']['price']
+                    'item_id'     : i['id'],
+                    'price'       : str(i['current']['price']),
+                    'trend'       : i['today']['trend'],
+                    'change_today': i['today']['price']
                 }
 
                 items_list.append(item)
                 price_list.append(price)
 
             item_df = pd.DataFrame(items_list)
-            item_df = item_df.set_index('ItemID')
+            item_df = item_df.set_index('item_id')
 
             price_df = pd.DataFrame(price_list)
-            price_df = price_df.set_index('ItemID')
-            
+            price_df = price_df.set_index('item_id')
+            # Convert K and M to 1000 and 1000000
+            price_df["price"] = price_df.price.apply(self.convert_to_int)
+            price_df["change_today"] = price_df.change_today.apply(self.convert_to_int)
 
             self.save_csv(item_df, 'items')
             self.save_csv(price_df, 'prices')
-
+            
+            '''
+            engine = create_engine('postgresql://nclack:Fuckp@ssw0rds@localhost:5432/grandexchange')
+            item_df.to_sql('item', con=engine, if_exists='append')
+            price_df.to_sql('price', con=engine, if_exists='append')
+            '''
             print('fetch_item_json Completed!')
             
             '''
