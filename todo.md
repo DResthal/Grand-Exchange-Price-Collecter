@@ -1,6 +1,0 @@
-- python logging  
-- testing
-- Save to postgres
-- Add exceptions to classes
-- Move item save to csv from app.py to fetch_items.py
-- Rename files

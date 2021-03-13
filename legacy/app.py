@@ -5,7 +5,7 @@ from apifetch.fetch_items import FetchItems
 from datetime import datetime
 from dotenv import load_dotenv
 # from pandarallel import pandarallel
-import pandas as pd
+import dask.dataframe as pd
 import sys
 import logging
 import time

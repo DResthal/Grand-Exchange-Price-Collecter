@@ -139,7 +139,7 @@ class FetchItems:
         # So I am condensing for now, logging errors and will break out as errors appear
         except:
             res_text = ""
-            if res.text:
+            if res_text:
                 res_text = f"{str(res.headers)}\nTEXT: {str(res.text)}\n"
             if res.content:
                 res_text = f"{str(res.headers)}\nCONTENT: {str(res.content)}\n"
