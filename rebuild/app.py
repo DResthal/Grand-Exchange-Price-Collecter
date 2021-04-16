@@ -7,6 +7,7 @@
 # Write processed response to dataframe
 # Write dataframe to csv
 from c_logger import CustomLogger
+from fetch.groups import get_categories
 import time
 import logging
 import os
@@ -60,3 +61,12 @@ def file_is_old(file_path: str, max_age: int = 604800) -> bool:
             f"File {file_path} is too new to replace, skipping file generation"
         )
         return False
+
+
+# Get the response from each category
+categories = get_categories(
+    ncats=42,
+)
+
+with open("test.txt", "a") as f:
+    f.write(str(categories))
